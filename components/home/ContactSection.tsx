@@ -60,7 +60,7 @@ export default function ContactSection() {
     }`;
 
   return (
-    <section className="py-24 bg-white" aria-label="Contact Us" id="contact">
+    <section className="py-24 bg-white overflow-x-hidden" aria-label="Contact Us" id="contact">
       <div className="container mx-auto px-4">
         <SectionHeader
           badge="Get In Touch"
