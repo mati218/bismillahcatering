@@ -8,7 +8,7 @@ import {
   FaTheaterMasks, FaPalette, FaCrown, FaGem, FaTruck, FaFire,
   FaMosque, FaHeart, FaBook, FaConciergeBell, FaChevronRight,
 } from 'react-icons/fa';
-import { staggerContainer, staggerItem, viewportOnce } from '@/lib/animations';
+import { staggerContainer, staggerItem } from '@/lib/animations';
 import { services } from '@/data/services';
 
 const iconMap: Record<string, React.ReactNode> = {
@@ -28,7 +28,7 @@ export default function ServicesGrid() {
           variants={staggerContainer}
           initial="hidden"
           whileInView="visible"
-          viewport={viewportOnce}
+          viewport={{ once: true, amount: 0, margin: '0px 0px -100px 0px' }}
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
         >
           {services.map((service) => (
