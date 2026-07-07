@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, type Variants } from 'framer-motion';
 import {
   FaWhatsapp, FaPhone, FaChevronRight, FaCheck,
   FaRing, FaUtensils, FaStar, FaHome, FaBriefcase,
@@ -36,12 +36,17 @@ interface Props {
   related: Service[];
 }
 
-const fadeUp = {
+const fadeUp: Variants = {
   hidden: { opacity: 0, y: 24 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] } },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] },
+  },
 };
 
-const stagger = {
+const stagger: Variants = {
+  hidden: {},
   visible: { transition: { staggerChildren: 0.1 } },
 };
 

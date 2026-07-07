@@ -228,7 +228,7 @@ export default function GalleryGrid() {
               initial={{ opacity: 0, scale: 0.94, y: 12 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.94 }}
-              transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }}
               onClick={(e) => e.stopPropagation()}
               className="relative w-full max-w-5xl rounded-2xl overflow-hidden bg-[#0d0900] shadow-[0_32px_80px_rgba(0,0,0,0.9)] flex flex-col"
               style={{ maxHeight: 'calc(100vh - 160px)' }}

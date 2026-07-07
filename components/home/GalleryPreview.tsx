@@ -10,15 +10,18 @@ import {
 } from 'react-icons/fa';
 import { staggerContainer, staggerItem, viewportOnce } from '@/lib/animations';
 import SectionHeader from '@/components/common/SectionHeader';
-import { galleryItems, type GalleryItem } from '@/data/gallery';
+import { galleryItems } from '@/data/gallery';
+
+// Shape used in the homepage lightbox
+type PreviewItem = (typeof galleryItems)[number];
 
 // 9 featured items for the homepage grid
 const previewItems = galleryItems.filter((item) => item.featured).slice(0, 9);
 
 export default function GalleryPreview() {
-  const [lightbox, setLightbox] = useState<{ item: GalleryItem; index: number } | null>(null);
+  const [lightbox, setLightbox] = useState<{ item: PreviewItem; index: number } | null>(null);
 
-  const openLightbox = (item: GalleryItem, index: number) => setLightbox({ item, index });
+  const openLightbox = (item: PreviewItem, index: number) => setLightbox({ item, index });
   const closeLightbox = () => setLightbox(null);
 
   const navigate = (dir: 1 | -1) => {
@@ -160,7 +163,7 @@ export default function GalleryPreview() {
               initial={{ opacity: 0, scale: 0.93, y: 16 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.93, y: 16 }}
-              transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }}
               onClick={(e) => e.stopPropagation()}
               className="relative w-full max-w-4xl rounded-2xl overflow-hidden bg-[#0d0900] shadow-[0_30px_80px_rgba(0,0,0,0.8)]"
             >

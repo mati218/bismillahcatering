@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, type Variants } from 'framer-motion';
 import {
   FaBars, FaTimes, FaPhone, FaWhatsapp, FaChevronDown,
   FaRing, FaUtensils, FaStar, FaHome, FaBriefcase,
@@ -47,11 +47,11 @@ const navLinks = [
 ];
 
 /* ─── Submenu animation variants ─── */
-const submenuVariants = {
+const submenuVariants: Variants = {
   hidden: { opacity: 0, y: 12, scale: 0.97 },
   visible: {
     opacity: 1, y: 0, scale: 1,
-    transition: { duration: 0.25, ease: [0.22, 1, 0.36, 1] },
+    transition: { duration: 0.25, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] },
   },
   exit: {
     opacity: 0, y: 8, scale: 0.97,
@@ -59,7 +59,7 @@ const submenuVariants = {
   },
 };
 
-const itemVariants = {
+const itemVariants: Variants = {
   hidden: { opacity: 0, x: -6 },
   visible: (i: number) => ({
     opacity: 1, x: 0,
@@ -104,7 +104,7 @@ export default function Navbar() {
       <motion.header
         initial={{ y: -100 }}
         animate={{ y: 0 }}
-        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }}
         className={`fixed top-[3px] left-0 right-0 z-50 transition-all duration-500 ${
           scrolled
             ? 'bg-[#0d0900]/95 backdrop-blur-md shadow-[0_4px_30px_rgba(0,0,0,0.5)] py-2'

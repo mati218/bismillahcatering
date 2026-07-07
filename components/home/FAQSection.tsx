@@ -78,7 +78,7 @@ function FAQItem({ question, answer, index }: FAQItemProps) {
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }}
           >
             <div className="px-5 md:px-6 pb-5 md:pb-6 bg-white border-t border-gray-100">
               <p className="font-body text-dark/70 text-sm md:text-base leading-relaxed pt-4">
