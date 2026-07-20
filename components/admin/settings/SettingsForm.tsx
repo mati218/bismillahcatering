@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Button, Card, Field, Input, Textarea } from '@/components/admin/ui';
 import ImageUploadField from '@/components/admin/ImageUploadField';
+import { useToast } from '@/components/admin/toast/ToastProvider';
 
 export interface SettingsValue {
   companyName: string;
@@ -18,16 +19,13 @@ export interface SettingsValue {
 }
 
 export default function SettingsForm({ initial }: { initial: SettingsValue }) {
+  const toast = useToast();
   const [value, setValue] = useState(initial);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
-  const [saved, setSaved] = useState(false);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
-    setError('');
-    setSaved(false);
     const res = await fetch('/api/admin/settings', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
@@ -35,11 +33,10 @@ export default function SettingsForm({ initial }: { initial: SettingsValue }) {
     });
     setSaving(false);
     if (res.ok) {
-      setSaved(true);
-      setTimeout(() => setSaved(false), 3000);
+      toast.success('Settings saved.');
     } else {
       const data = await res.json().catch(() => ({}));
-      setError(data.error || 'Failed to save settings');
+      toast.error(data.error || 'Failed to save settings');
     }
   };
 
@@ -78,9 +75,6 @@ export default function SettingsForm({ initial }: { initial: SettingsValue }) {
         <ImageUploadField label="Logo" value={value.logoUrl} onChange={(url) => setValue({ ...value, logoUrl: url })} />
         <ImageUploadField label="Default Social Share Image" value={value.ogImageUrl} onChange={(url) => setValue({ ...value, ogImageUrl: url })} />
       </Card>
-
-      {error && <p className="text-red-500 text-sm">{error}</p>}
-      {saved && <p className="text-green-600 text-sm">Settings saved.</p>}
 
       <Button type="submit" disabled={saving}>{saving ? 'Saving...' : 'Save Settings'}</Button>
     </form>

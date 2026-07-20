@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { FaPlus, FaTrash } from 'react-icons/fa';
 import { Button, Card, Checkbox, Field, Input, Select, Textarea } from '@/components/admin/ui';
 import ImageUploadField from '@/components/admin/ImageUploadField';
+import { useToast } from '@/components/admin/toast/ToastProvider';
 
 export interface ServiceGalleryValue {
   src: string;
@@ -40,9 +41,9 @@ function slugify(text: string) {
 
 export default function ServiceForm({ initial, serviceId }: { initial: ServiceValue; serviceId?: string }) {
   const router = useRouter();
+  const toast = useToast();
   const [value, setValue] = useState(initial);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
 
   const updateGallery = (i: number, patch: Partial<ServiceGalleryValue>) =>
     setValue({ ...value, gallery: value.gallery.map((g, idx) => (idx === i ? { ...g, ...patch } : g)) });
@@ -57,7 +58,6 @@ export default function ServiceForm({ initial, serviceId }: { initial: ServiceVa
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
-    setError('');
     const url = serviceId ? `/api/admin/services/${serviceId}` : '/api/admin/services';
     const method = serviceId ? 'PATCH' : 'POST';
     const res = await fetch(url, {
@@ -67,11 +67,12 @@ export default function ServiceForm({ initial, serviceId }: { initial: ServiceVa
     });
     setSaving(false);
     if (res.ok) {
+      toast.success(serviceId ? 'Service updated.' : 'Service created.');
       router.push('/admin/services');
       router.refresh();
     } else {
       const data = await res.json().catch(() => ({}));
-      setError(data.error || 'Failed to save service');
+      toast.error(data.error || 'Failed to save service');
     }
   };
 
@@ -180,8 +181,6 @@ export default function ServiceForm({ initial, serviceId }: { initial: ServiceVa
           {value.highlights.length === 0 && <p className="text-sm text-dark/40">No highlights added yet.</p>}
         </div>
       </Card>
-
-      {error && <p className="text-red-500 text-sm">{error}</p>}
 
       <div className="flex gap-3">
         <Button type="submit" disabled={saving}>{saving ? 'Saving...' : 'Save Service'}</Button>

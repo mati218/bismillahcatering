@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { FaPlus, FaTrash } from 'react-icons/fa';
 import { Button, Card, Checkbox, Field, Input } from '@/components/admin/ui';
+import { useToast } from '@/components/admin/toast/ToastProvider';
 
 export interface PackageFeatureValue {
   text: string;
@@ -25,9 +26,9 @@ export interface PackageValue {
 
 export default function PackageForm({ initial, packageId }: { initial: PackageValue; packageId?: string }) {
   const router = useRouter();
+  const toast = useToast();
   const [value, setValue] = useState(initial);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
 
   const updateFeature = (i: number, patch: Partial<PackageFeatureValue>) => {
     setValue({
@@ -45,7 +46,6 @@ export default function PackageForm({ initial, packageId }: { initial: PackageVa
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
-    setError('');
     const url = packageId ? `/api/admin/packages/${packageId}` : '/api/admin/packages';
     const method = packageId ? 'PATCH' : 'POST';
     const res = await fetch(url, {
@@ -55,11 +55,12 @@ export default function PackageForm({ initial, packageId }: { initial: PackageVa
     });
     setSaving(false);
     if (res.ok) {
+      toast.success(packageId ? 'Package updated.' : 'Package created.');
       router.push('/admin/packages');
       router.refresh();
     } else {
       const data = await res.json().catch(() => ({}));
-      setError(data.error || 'Failed to save package');
+      toast.error(data.error || 'Failed to save package');
     }
   };
 
@@ -118,8 +119,6 @@ export default function PackageForm({ initial, packageId }: { initial: PackageVa
           {value.features.length === 0 && <p className="text-sm text-dark/40">No features added yet.</p>}
         </div>
       </Card>
-
-      {error && <p className="text-red-500 text-sm">{error}</p>}
 
       <div className="flex gap-3">
         <Button type="submit" disabled={saving}>{saving ? 'Saving...' : 'Save Package'}</Button>

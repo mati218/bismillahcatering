@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { FaPlus, FaTrash } from 'react-icons/fa';
 import { Button, Card, Checkbox, Field, Input, Textarea } from '@/components/admin/ui';
 import ImageUploadField from '@/components/admin/ImageUploadField';
+import { useToast } from '@/components/admin/toast/ToastProvider';
 
 export interface GalleryImageValue {
   src: string;
@@ -24,9 +25,9 @@ export interface GalleryEventValue {
 
 export default function GalleryEventForm({ initial, eventId }: { initial: GalleryEventValue; eventId?: string }) {
   const router = useRouter();
+  const toast = useToast();
   const [value, setValue] = useState(initial);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
 
   const updateImage = (i: number, patch: Partial<GalleryImageValue>) =>
     setValue({ ...value, images: value.images.map((img, idx) => (idx === i ? { ...img, ...patch } : img)) });
@@ -37,7 +38,6 @@ export default function GalleryEventForm({ initial, eventId }: { initial: Galler
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
-    setError('');
     const url = eventId ? `/api/admin/gallery/${eventId}` : '/api/admin/gallery';
     const method = eventId ? 'PATCH' : 'POST';
     const res = await fetch(url, {
@@ -47,11 +47,12 @@ export default function GalleryEventForm({ initial, eventId }: { initial: Galler
     });
     setSaving(false);
     if (res.ok) {
+      toast.success(eventId ? 'Gallery event updated.' : 'Gallery event created.');
       router.push('/admin/gallery');
       router.refresh();
     } else {
       const data = await res.json().catch(() => ({}));
-      setError(data.error || 'Failed to save gallery event');
+      toast.error(data.error || 'Failed to save gallery event');
     }
   };
 
@@ -106,8 +107,6 @@ export default function GalleryEventForm({ initial, eventId }: { initial: Galler
           {value.images.length === 0 && <p className="text-sm text-dark/40">No photos added yet.</p>}
         </div>
       </Card>
-
-      {error && <p className="text-red-500 text-sm">{error}</p>}
 
       <div className="flex gap-3">
         <Button type="submit" disabled={saving}>{saving ? 'Saving...' : 'Save Gallery Event'}</Button>
