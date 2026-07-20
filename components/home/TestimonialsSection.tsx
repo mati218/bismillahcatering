@@ -4,9 +4,9 @@ import { motion } from 'framer-motion';
 import { FaStar, FaQuoteLeft } from 'react-icons/fa';
 import { staggerContainer, staggerItem, viewportOnce } from '@/lib/animations';
 import SectionHeader from '@/components/common/SectionHeader';
-import { testimonials } from '@/data/testimonials';
+import type { getTestimonials } from '@/lib/data/testimonials';
 
-export default function TestimonialsSection() {
+export default function TestimonialsSection({ testimonials }: { testimonials: Awaited<ReturnType<typeof getTestimonials>> }) {
   return (
     <section className="py-24 bg-dark relative overflow-hidden" aria-label="Client Testimonials">
       {/* Decorative */}

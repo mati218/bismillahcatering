@@ -10,15 +10,24 @@ import {
 } from 'react-icons/fa';
 import { staggerContainer, staggerItem, viewportOnce } from '@/lib/animations';
 import SectionHeader from '@/components/common/SectionHeader';
-import { galleryItems } from '@/data/gallery';
+import type { getGalleryEvents } from '@/lib/data/gallery';
 
 // Shape used in the homepage lightbox
-type PreviewItem = (typeof galleryItems)[number];
+interface PreviewItem {
+  id: string;
+  title: string;
+  category: string;
+  image: string;
+  description?: string | null;
+}
 
-// 9 featured items for the homepage grid
-const previewItems = galleryItems.filter((item) => item.featured).slice(0, 9);
+export default function GalleryPreview({ events }: { events: Awaited<ReturnType<typeof getGalleryEvents>> }) {
+  // 9 featured events for the homepage grid
+  const previewItems: PreviewItem[] = events
+    .filter((e) => e.featured)
+    .slice(0, 9)
+    .map((e) => ({ id: e.id, title: e.title, category: e.category, image: e.cover, description: e.description }));
 
-export default function GalleryPreview() {
   const [lightbox, setLightbox] = useState<{ item: PreviewItem; index: number } | null>(null);
 
   const openLightbox = (item: PreviewItem, index: number) => setLightbox({ item, index });

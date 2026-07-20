@@ -6,9 +6,10 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useState } from 'react';
 import { FaPhone, FaEnvelope, FaMapMarkerAlt, FaWhatsapp, FaPaperPlane } from 'react-icons/fa';
-import { staggerContainer, staggerItem, fadeLeft, fadeRight, viewportOnce } from '@/lib/animations';
+import { fadeLeft, fadeRight, viewportOnce } from '@/lib/animations';
 import SectionHeader from '@/components/common/SectionHeader';
 import { getWhatsAppUrl } from '@/lib/utils';
+import type { getSiteSettings } from '@/lib/data/settings';
 
 const schema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
@@ -28,13 +29,9 @@ const eventTypes = [
   'Aqeeqah', 'Office Lunch', 'Hi-Tea', 'BBQ Party', 'Other',
 ];
 
-export default function ContactSection() {
+export default function ContactSection({ settings }: { settings: Awaited<ReturnType<typeof getSiteSettings>> }) {
   const [submitted, setSubmitted] = useState(false);
-  const phone = process.env.NEXT_PUBLIC_PHONE || '+92-300-0000000';
-  const email = process.env.NEXT_PUBLIC_EMAIL || 'info@bismillahcatering.com';
-  const location = process.env.NEXT_PUBLIC_LOCATION || 'Lahore, Pakistan';
-  const whatsapp = process.env.NEXT_PUBLIC_WHATSAPP || '923000000000';
-  const googleMap = process.env.NEXT_PUBLIC_GOOGLE_MAP || '#';
+  const { phone, email, address: location, whatsapp, googleMapUrl: googleMap } = settings;
 
   const {
     register,
@@ -44,6 +41,12 @@ export default function ContactSection() {
   } = useForm<FormData>({ resolver: zodResolver(schema) });
 
   const onSubmit = async (data: FormData) => {
+    fetch('/api/leads', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...data, source: 'contact' }),
+    }).catch(() => {});
+
     // Build WhatsApp message
     const message = `*New Event Inquiry*%0A%0A*Name:* ${data.name}%0A*Phone:* ${data.phone}%0A*Email:* ${data.email}%0A*Event Type:* ${data.eventType}%0A*Date:* ${data.date}%0A*Guests:* ${data.guests}%0A*Message:* ${data.message}`;
     window.open(`https://wa.me/${whatsapp}?text=${message}`, '_blank');

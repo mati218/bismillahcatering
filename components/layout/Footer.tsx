@@ -3,13 +3,15 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
+import * as FaIcons from 'react-icons/fa';
 import {
   FaPhone, FaEnvelope, FaMapMarkerAlt,
-  FaWhatsapp, FaFacebook, FaInstagram,
-  FaYoutube, FaTiktok, FaArrowUp,
+  FaWhatsapp, FaArrowUp,
 } from 'react-icons/fa';
 import { staggerContainer, staggerItem, viewportOnce } from '@/lib/animations';
 import { getWhatsAppUrl } from '@/lib/utils';
+import type { getSiteSettings } from '@/lib/data/settings';
+import type { getSocialLinks } from '@/lib/data/socialLinks';
 
 const quickLinks = [
   { label: 'Home', href: '/' },
@@ -29,15 +31,13 @@ const serviceLinks = [
   { label: 'Birthday Parties', href: '/services' },
 ];
 
-export default function Footer() {
-  const phone = process.env.NEXT_PUBLIC_PHONE || '+92-300-0000000';
-  const whatsapp = process.env.NEXT_PUBLIC_WHATSAPP || '923000000000';
-  const email = process.env.NEXT_PUBLIC_EMAIL || 'info@bismillahcatering.com';
-  const location = process.env.NEXT_PUBLIC_LOCATION || 'Lahore, Pakistan';
-  const facebook = process.env.NEXT_PUBLIC_FACEBOOK || '#';
-  const instagram = process.env.NEXT_PUBLIC_INSTAGRAM || 'https://www.instagram.com/bismillahcaterers.pk/';
-  const youtube = process.env.NEXT_PUBLIC_YOUTUBE || '#';
-  const tiktok = process.env.NEXT_PUBLIC_TIKTOK || '#';
+interface FooterProps {
+  settings: Awaited<ReturnType<typeof getSiteSettings>>;
+  socialLinks: Awaited<ReturnType<typeof getSocialLinks>>;
+}
+
+export default function Footer({ settings, socialLinks }: FooterProps) {
+  const { phone, whatsapp, email, address: location, googleMapUrl } = settings;
 
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
 
@@ -101,35 +101,38 @@ export default function Footer() {
           <motion.div variants={staggerItem}>
             <Link href="/" className="flex items-center gap-3 mb-5">
               <div className="relative w-14 h-14 rounded-full overflow-hidden border-2 border-gold-500">
-                <Image src="/logo.jpg" alt="Bismillah Catering Logo" fill className="object-cover" />
+                <Image src={settings.logoUrl} alt={`${settings.companyName} Logo`} fill className="object-cover" />
               </div>
               <div>
-                <span className="font-heading text-white text-xl font-bold leading-tight block">Bismillah</span>
-                <span className="text-gold-500 text-xs font-body tracking-[0.2em] uppercase">Catering</span>
+                <span className="font-heading text-white text-xl font-bold leading-tight block">{settings.companyName}</span>
               </div>
             </Link>
             <p className="text-white/60 font-body text-sm leading-relaxed mb-5">
-              Premium catering and complete event management services in Lahore. Making your dream events memorable since 2014.
+              Premium catering and complete event management services in Lahore. Making your dream events memorable since {settings.foundedYear}.
             </p>
             <div className="flex items-center gap-3">
               {[
-                { icon: <FaFacebook />, href: facebook, label: 'Facebook' },
-                { icon: <FaInstagram />, href: instagram, label: 'Instagram' },
-                { icon: <FaYoutube />, href: youtube, label: 'YouTube' },
-                { icon: <FaTiktok />, href: tiktok, label: 'TikTok' },
-                { icon: <FaWhatsapp />, href: getWhatsAppUrl(whatsapp), label: 'WhatsApp' },
-              ].map((social) => (
-                <a
-                  key={social.label}
-                  href={social.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={social.label}
-                  className="w-9 h-9 rounded-full bg-white/10 hover:bg-gold-500 hover:text-dark flex items-center justify-center text-white transition-all duration-300"
-                >
-                  {social.icon}
-                </a>
-              ))}
+                ...socialLinks.map((social) => ({
+                  icon: FaIcons[social.icon as keyof typeof FaIcons] || FaIcons.FaShare,
+                  href: social.url,
+                  label: social.platform,
+                })),
+                { icon: FaWhatsapp, href: getWhatsAppUrl(whatsapp), label: 'WhatsApp' },
+              ].map((social) => {
+                const Icon = social.icon as React.ElementType;
+                return (
+                  <a
+                    key={social.label}
+                    href={social.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={social.label}
+                    className="w-9 h-9 rounded-full bg-white/10 hover:bg-gold-500 hover:text-dark flex items-center justify-center text-white transition-all duration-300"
+                  >
+                    <Icon />
+                  </a>
+                );
+              })}
             </div>
           </motion.div>
 
@@ -193,7 +196,7 @@ export default function Footer() {
               </li>
               <li>
                 <a
-                  href={process.env.NEXT_PUBLIC_GOOGLE_MAP || '#'}
+                  href={googleMapUrl || '#'}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-start gap-3 text-white/60 hover:text-gold-500 transition-colors group"
@@ -222,7 +225,7 @@ export default function Footer() {
       <div className="border-t border-white/10 py-5">
         <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-3">
           <p className="text-white/40 font-body text-sm text-center">
-            © {new Date().getFullYear()} Bismillah Catering. All Rights Reserved.
+            © {new Date().getFullYear()} {settings.companyName}. All Rights Reserved.
           </p>
           <p className="text-white/40 font-body text-sm">
             Designed with ❤️ in Lahore, Pakistan

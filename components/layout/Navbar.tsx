@@ -13,6 +13,8 @@ import {
 import { GiTheaterCurtains } from 'react-icons/gi';
 import { useScrollProgress } from '@/hooks/useScrollProgress';
 import { getWhatsAppUrl } from '@/lib/utils';
+import type { getServices } from '@/lib/data/services';
+import type { getSiteSettings } from '@/lib/data/settings';
 
 /* ─── Icon map ─── */
 const iconMap: Record<string, React.ElementType> = {
@@ -20,22 +22,6 @@ const iconMap: Record<string, React.ElementType> = {
   FaBirthdayCake, FaTheaterMasks: GiTheaterCurtains, FaPalette, FaCrown,
   FaGem, FaFire, FaMosque, FaHeart, FaBook, FaConciergeBell,
 };
-
-/* ─── Services submenu data (first 8 featured) ─── */
-const serviceItems = [
-  { label: 'Wedding Planning', slug: 'wedding-planning', icon: 'FaRing', desc: 'End-to-end luxury weddings' },
-  { label: 'Catering Services', slug: 'catering', icon: 'FaUtensils', desc: 'Premium multi-cuisine menus' },
-  { label: 'Event Decoration', slug: 'decoration', icon: 'FaStar', desc: 'Floral, lighting & stage décor' },
-  { label: 'Stage Decoration', slug: 'stage-decoration', icon: 'FaTheaterMasks', desc: 'Grand stage & backdrop design' },
-  { label: 'Mehndi Setup', slug: 'mehndi', icon: 'FaPalette', desc: 'Vibrant canopy arrangements' },
-  { label: 'Barat Setup', slug: 'barat', icon: 'FaCrown', desc: 'Grand barat & venue transform' },
-  { label: 'Walima Setup', slug: 'walima', icon: 'FaGem', desc: 'Elegant dining & ambiance' },
-  { label: 'Corporate Events', slug: 'corporate', icon: 'FaBriefcase', desc: 'Conferences & office events' },
-  { label: 'Birthday Parties', slug: 'birthday', icon: 'FaBirthdayCake', desc: 'Themed magical celebrations' },
-  { label: 'Farmhouse Events', slug: 'farmhouse', icon: 'FaHome', desc: 'Outdoor & farmhouse setups' },
-  { label: 'BBQ & Live Cooking', slug: 'bbq', icon: 'FaFire', desc: 'Live BBQ stations & chef shows' },
-  { label: 'Buffet Setup', slug: 'buffet', icon: 'FaConciergeBell', desc: 'Grand display & live counters' },
-];
 
 const navLinks = [
   { label: 'Home', href: '/' },
@@ -67,15 +53,26 @@ const itemVariants: Variants = {
   }),
 };
 
-export default function Navbar() {
+interface NavbarProps {
+  settings: Awaited<ReturnType<typeof getSiteSettings>>;
+  services: Awaited<ReturnType<typeof getServices>>;
+}
+
+export default function Navbar({ settings, services }: NavbarProps) {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [mobileServicesOpen, setMobileServicesOpen] = useState(false);
   const [submenuOpen, setSubmenuOpen] = useState(false);
   const submenuTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const progress = useScrollProgress();
-  const phone = process.env.NEXT_PUBLIC_PHONE || '+92-300-0000000';
-  const whatsapp = process.env.NEXT_PUBLIC_WHATSAPP || '923000000000';
+  const phone = settings.phone;
+  const whatsapp = settings.whatsapp;
+  const serviceItems = services.slice(0, 12).map((s) => ({
+    label: s.title,
+    slug: s.slug,
+    icon: s.icon,
+    desc: s.description.length > 42 ? `${s.description.slice(0, 42)}...` : s.description,
+  }));
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
@@ -218,7 +215,7 @@ export default function Navbar() {
                         {/* Footer CTA */}
                         <div className="px-5 py-3 bg-[#F6C945]/5 border-t border-[#F6C945]/15 flex items-center justify-between">
                           <p className="text-white/40 text-xs font-body">
-                            16+ premium services available
+                            {services.length}+ premium services available
                           </p>
                           <Link
                             href="/booking"

@@ -1,8 +1,9 @@
 import type { Metadata } from 'next';
 import './globals.css';
-import Navbar from '@/components/layout/Navbar';
-import Footer from '@/components/layout/Footer';
-import FloatingWhatsApp from '@/components/common/FloatingWhatsApp';
+import { getSiteSettings } from '@/lib/data/settings';
+import { getSocialLinks } from '@/lib/data/socialLinks';
+
+export const revalidate = 60;
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://bismillahcatering.com'),
@@ -70,7 +71,9 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const [settings, socialLinks] = await Promise.all([getSiteSettings(), getSocialLinks()]);
+
   return (
     <html lang="en">
       <head>
@@ -89,16 +92,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             __html: JSON.stringify({
               '@context': 'https://schema.org',
               '@type': 'FoodEstablishment',
-              name: 'Bismillah Catering',
-              description:
-                'Premium catering and complete event management in Lahore',
+              name: settings.companyName,
+              description: 'Premium catering and complete event management in Lahore',
               url: 'https://bismillahcatering.com',
-              telephone: process.env.NEXT_PUBLIC_PHONE,
-              email: process.env.NEXT_PUBLIC_EMAIL,
+              telephone: settings.phone,
+              email: settings.email,
               address: {
                 '@type': 'PostalAddress',
-                streetAddress:
-                  'Plot 119, Nespak Housing Society Phase 3 Block A Engineers Town',
+                streetAddress: settings.address,
                 addressLocality: 'Lahore',
                 postalCode: '54000',
                 addressCountry: 'PK',
@@ -111,21 +112,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               openingHours: 'Mo-Su 08:00-22:00',
               servesCuisine: ['Pakistani', 'Mughlai', 'BBQ', 'Continental'],
               priceRange: '$$',
-              image: '/logo.jpg',
-              sameAs: [
-                process.env.NEXT_PUBLIC_INSTAGRAM,
-                process.env.NEXT_PUBLIC_FACEBOOK,
-                process.env.NEXT_PUBLIC_YOUTUBE,
-              ].filter(Boolean),
+              image: settings.logoUrl,
+              sameAs: socialLinks.map((s) => s.url),
             }),
           }}
         />
       </head>
       <body className="font-body antialiased bg-white text-dark overflow-x-hidden">
-        <Navbar />
-        <main>{children}</main>
-        <Footer />
-        <FloatingWhatsApp />
+        {children}
       </body>
     </html>
   );

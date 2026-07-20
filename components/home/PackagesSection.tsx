@@ -4,13 +4,16 @@ import { motion } from 'framer-motion';
 import { FaCheck, FaTimes, FaWhatsapp } from 'react-icons/fa';
 import { staggerContainer, staggerItem, viewportOnce } from '@/lib/animations';
 import SectionHeader from '@/components/common/SectionHeader';
-import { packages } from '@/data/packages';
+import type { getPackages } from '@/lib/data/packages';
 import { getWhatsAppUrl } from '@/lib/utils';
 import { cn } from '@/lib/utils';
 
-export default function PackagesSection() {
-  const whatsapp = process.env.NEXT_PUBLIC_WHATSAPP || '923000000000';
+interface PackagesSectionProps {
+  packages: Awaited<ReturnType<typeof getPackages>>;
+  whatsapp: string;
+}
 
+export default function PackagesSection({ packages, whatsapp }: PackagesSectionProps) {
   return (
     <section className="py-24 bg-[#FAFAFA]" aria-label="Wedding Packages">
       <div className="container mx-auto px-4">

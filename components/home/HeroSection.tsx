@@ -7,15 +7,12 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { getWhatsAppUrl } from '@/lib/utils';
 
-export default function HeroSection() {
+export default function HeroSection({ whatsapp, phone }: { whatsapp: string; phone: string }) {
   const ref = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end start'] });
   const y = useTransform(scrollYProgress, [0, 1], ['0%', '25%']);
   const opacity = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
   const scale = useTransform(scrollYProgress, [0, 1], [1, 1.1]);
-
-  const whatsapp = process.env.NEXT_PUBLIC_WHATSAPP || '923000000000';
-  const phone = process.env.NEXT_PUBLIC_PHONE || '+92-300-0000000';
 
   return (
     <section
