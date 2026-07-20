@@ -1,65 +1,13 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import {
-  FaLeaf, FaUsers, FaTag, FaGem, FaUserTie, FaClock,
-  FaHeart, FaHome
-} from 'react-icons/fa';
+import * as FaIcons from 'react-icons/fa';
+import { FaGem } from 'react-icons/fa';
 import { staggerContainer, staggerItem, fadeLeft, fadeRight, viewportOnce } from '@/lib/animations';
 import SectionHeader from '@/components/common/SectionHeader';
+import type { getWhyChooseUsReasons } from '@/lib/data/whyChooseUs';
 
-const reasons = [
-  {
-    icon: <FaLeaf />,
-    title: 'Fresh Food Always',
-    description: 'We use only the freshest ingredients, prepared on the day of your event for maximum taste and quality.',
-    color: '#22c55e',
-  },
-  {
-    icon: <FaUsers />,
-    title: 'Professional Team',
-    description: 'Our trained team of chefs, decorators, and managers ensures flawless execution of every event.',
-    color: '#3b82f6',
-  },
-  {
-    icon: <FaTag />,
-    title: 'Affordable Packages',
-    description: 'Premium quality at competitive prices. Customizable packages to fit every budget without compromise.',
-    color: '#f59e0b',
-  },
-  {
-    icon: <FaGem />,
-    title: 'Luxury Decoration',
-    description: 'World-class décor with premium materials, floral arrangements, and lighting that transforms any venue.',
-    color: '#8b5cf6',
-  },
-  {
-    icon: <FaUserTie />,
-    title: 'Experienced Staff',
-    description: 'Over 10 years of experience with a dedicated team that has mastered the art of event management.',
-    color: '#ec4899',
-  },
-  {
-    icon: <FaClock />,
-    title: 'On-Time Service',
-    description: 'We believe punctuality is key. Every setup, service, and delivery is completed on schedule.',
-    color: '#14b8a6',
-  },
-  {
-    icon: <FaHeart />,
-    title: 'Complete Wedding Planning',
-    description: 'From engagement to walima — we manage every ceremony with care, love, and attention to detail.',
-    color: '#ef4444',
-  },
-  {
-    icon: <FaHome />,
-    title: 'Farmhouse Management',
-    description: 'Expert farmhouse event coordination with full outdoor setup, décor, and catering services.',
-    color: '#f97316',
-  },
-];
-
-export default function WhyChooseUs() {
+export default function WhyChooseUs({ reasons }: { reasons: Awaited<ReturnType<typeof getWhyChooseUsReasons>> }) {
   return (
     <section className="py-24 bg-dark relative overflow-hidden" aria-label="Why Choose Bismillah Catering">
       {/* Background circles */}
@@ -83,23 +31,26 @@ export default function WhyChooseUs() {
             viewport={viewportOnce}
             className="grid grid-cols-1 sm:grid-cols-2 gap-5"
           >
-            {reasons.map((reason, i) => (
-              <motion.div
-                key={reason.title}
-                variants={staggerItem}
-                whileHover={{ scale: 1.03, y: -5 }}
-                className="bg-white/5 hover:bg-white/10 border border-white/10 hover:border-gold-500/40 rounded-2xl p-6 transition-all duration-300 group"
-              >
-                <div
-                  className="w-12 h-12 rounded-xl flex items-center justify-center text-xl mb-4 transition-transform group-hover:scale-110 duration-300"
-                  style={{ backgroundColor: `${reason.color}20`, color: reason.color }}
+            {reasons.map((reason) => {
+              const Icon = FaIcons[reason.icon as keyof typeof FaIcons] || FaIcons.FaStar;
+              return (
+                <motion.div
+                  key={reason.id}
+                  variants={staggerItem}
+                  whileHover={{ scale: 1.03, y: -5 }}
+                  className="bg-white/5 hover:bg-white/10 border border-white/10 hover:border-gold-500/40 rounded-2xl p-6 transition-all duration-300 group"
                 >
-                  {reason.icon}
-                </div>
-                <h3 className="font-heading text-white font-semibold mb-2">{reason.title}</h3>
-                <p className="font-body text-white/60 text-sm leading-relaxed">{reason.description}</p>
-              </motion.div>
-            ))}
+                  <div
+                    className="w-12 h-12 rounded-xl flex items-center justify-center text-xl mb-4 transition-transform group-hover:scale-110 duration-300"
+                    style={{ backgroundColor: `${reason.color}20`, color: reason.color }}
+                  >
+                    <Icon />
+                  </div>
+                  <h3 className="font-heading text-white font-semibold mb-2">{reason.title}</h3>
+                  <p className="font-body text-white/60 text-sm leading-relaxed">{reason.description}</p>
+                </motion.div>
+              );
+            })}
           </motion.div>
 
           {/* Right: Visual Feature */}

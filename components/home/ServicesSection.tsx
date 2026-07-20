@@ -10,7 +10,7 @@ import {
 } from 'react-icons/fa';
 import { staggerContainer, staggerItem, viewportOnce } from '@/lib/animations';
 import SectionHeader from '@/components/common/SectionHeader';
-import { services } from '@/data/services';
+import type { getServices } from '@/lib/data/services';
 
 const iconMap: Record<string, React.ReactNode> = {
   FaRing: <FaRing />,
@@ -31,10 +31,10 @@ const iconMap: Record<string, React.ReactNode> = {
   FaConciergeBell: <FaConciergeBell />,
 };
 
-// Show only first 12 services on homepage
-const featuredServices = services.slice(0, 12);
+export default function ServicesSection({ services }: { services: Awaited<ReturnType<typeof getServices>> }) {
+  // Show only first 12 services on homepage
+  const featuredServices = services.slice(0, 12);
 
-export default function ServicesSection() {
   return (
     <section className="py-24 bg-[#FAFAFA]" aria-label="Our Services">
       <div className="container mx-auto px-4">

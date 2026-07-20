@@ -5,9 +5,8 @@ import { FaWhatsapp, FaTimes } from 'react-icons/fa';
 import { useState } from 'react';
 import { getWhatsAppUrl } from '@/lib/utils';
 
-export default function FloatingWhatsApp() {
+export default function FloatingWhatsApp({ whatsapp }: { whatsapp: string }) {
   const [showTooltip, setShowTooltip] = useState(false);
-  const whatsapp = process.env.NEXT_PUBLIC_WHATSAPP || '923000000000';
   const message = 'Hello! I would like to inquire about your catering and event services.';
 
   return (

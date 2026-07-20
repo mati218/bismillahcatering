@@ -1,36 +1,59 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Bismillah Catering
+
+A Next.js (App Router) site for Bismillah Catering with a Postgres-backed admin panel. Every piece of site content — services, packages, gallery, testimonials, homepage sections, FAQs, social links, and company/contact info — is managed from `/admin`, along with a small CRM (leads, clients, quotations).
+
+## Stack
+
+- **Next.js 16** (App Router, Route Handlers as the API layer)
+- **PostgreSQL** via **Prisma** — local dev via Docker Compose, swap to [Neon](https://neon.tech) for production by changing one env var
+- Custom cookie-session auth for the admin panel (no third-party auth service)
 
 ## Getting Started
 
-First, run the development server:
+1. **Copy the env file** and adjust values as needed:
+   ```bash
+   cp .env.example .env
+   ```
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+2. **Start local Postgres** (Docker required):
+   ```bash
+   docker compose up -d
+   ```
+   This runs Postgres on `localhost:5433` (not 5432, to avoid clashing with any native Postgres install).
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+3. **Run migrations and seed the database**:
+   ```bash
+   npx prisma migrate dev
+   npx prisma db seed
+   ```
+   Seeding creates the admin account (from `ADMIN_EMAIL` / `ADMIN_PASSWORD` in `.env`) and populates every content model with the site's original copy, so the site looks the same as before on first run.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+4. **Run the dev server**:
+   ```bash
+   npm run dev
+   ```
+   - Public site: [http://localhost:3000](http://localhost:3000)
+   - Admin panel: [http://localhost:3000/admin](http://localhost:3000/admin) — log in with `ADMIN_EMAIL` / `ADMIN_PASSWORD`
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Project structure
 
-## Learn More
+- `app/(site)/**` — public pages (Navbar/Footer layout)
+- `app/admin/**` — admin panel (own layout, session-gated by `middleware.ts`)
+- `app/api/**` — public read-only REST endpoints (services, packages, gallery, etc.) and the public lead-capture endpoint
+- `app/api/admin/**` — authenticated CRUD endpoints used by the admin panel
+- `app/quote/[token]` — public, unauthenticated, printable quotation view shared with clients
+- `lib/data/**` — server-only Prisma query functions used by public pages (the same logic the public API exposes)
+- `prisma/schema.prisma` — data model; `prisma/seed.ts` + `prisma/seed-data/**` — initial content seed
 
-To learn more about Next.js, take a look at the following resources:
+## Content vs. CRM
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **Site content** (services, packages, gallery, testimonials, why-choose-us, process steps, FAQs, social links, company/contact settings) is fully editable from the admin panel and reflected on the public site within ~60 seconds (ISR revalidation) — no rebuild needed.
+- **Leads**: booking and contact form submissions are saved automatically (`/admin/leads`), in addition to the existing WhatsApp deep-link.
+- **Clients**: an internal contact list (`/admin/clients`); leads can be converted into clients from the leads table.
+- **Quotations**: build a priced quote for a client (`/admin/quotations/new`), with a shareable public link (`/quote/<token>`) they can view and print/save as PDF — no login required on their end.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Deploying / going live
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **Database**: create a [Neon](https://neon.tech) Postgres project, set `DATABASE_URL` to its connection string, then run `npx prisma migrate deploy` against it. Nothing else in the app needs to change.
+- **Uploaded images**: the admin panel currently saves uploads to `public/uploads` on local disk. This works for local dev and traditional Node hosting, but **will not persist** on serverless platforms like Vercel (the filesystem is ephemeral / read-only in production). Before deploying there, swap the upload handler (`app/api/admin/uploads/route.ts`) to a blob store such as Vercel Blob or Cloudinary.
+- **Secrets**: set `ADMIN_JWT_SECRET` to a long random string in production, and change the seeded admin password.
