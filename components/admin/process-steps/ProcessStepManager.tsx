@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { FaPlus, FaEdit } from 'react-icons/fa';
 import { Button, Card, Field, Input, Textarea, EmptyState } from '@/components/admin/ui';
 import DeleteButton from '@/components/admin/DeleteButton';
+import { useToast } from '@/components/admin/toast/ToastProvider';
 
 interface Step {
   id: string;
@@ -49,6 +50,7 @@ function FormFields({ value, onChange }: { value: typeof empty; onChange: (v: ty
 
 export default function ProcessStepManager({ initial }: { initial: Step[] }) {
   const router = useRouter();
+  const toast = useToast();
   const [items, setItems] = useState(initial);
   const [creating, setCreating] = useState(false);
   const [newItem, setNewItem] = useState(empty);
@@ -68,7 +70,8 @@ export default function ProcessStepManager({ initial }: { initial: Step[] }) {
       setItems([...items, await res.json()]);
       setNewItem(empty);
       setCreating(false);
-    } else window.alert('Failed to create');
+      toast.success('Step created.');
+    } else toast.error('Failed to create');
   };
 
   const saveEdit = async () => {
@@ -84,7 +87,8 @@ export default function ProcessStepManager({ initial }: { initial: Step[] }) {
       const updated = await res.json();
       setItems(items.map((i) => (i.id === editingId ? updated : i)));
       setEditingId(null);
-    } else window.alert('Failed to save');
+      toast.success('Step updated.');
+    } else toast.error('Failed to save');
   };
 
   return (

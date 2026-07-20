@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { FaPlus, FaEdit } from 'react-icons/fa';
 import { Button, Card, Checkbox, Field, Input, Textarea, EmptyState } from '@/components/admin/ui';
 import DeleteButton from '@/components/admin/DeleteButton';
+import { useToast } from '@/components/admin/toast/ToastProvider';
 
 interface Faq {
   id: string;
@@ -45,6 +46,7 @@ function FaqFormFields({
 
 export default function FaqManager({ initial }: { initial: Faq[] }) {
   const router = useRouter();
+  const toast = useToast();
   const [items, setItems] = useState(initial);
   const [creating, setCreating] = useState(false);
   const [newFaq, setNewFaq] = useState(empty);
@@ -71,8 +73,9 @@ export default function FaqManager({ initial }: { initial: Faq[] }) {
       setItems([...items, created]);
       setNewFaq(empty);
       setCreating(false);
+      toast.success('FAQ created.');
     } else {
-      window.alert('Failed to create FAQ');
+      toast.error('Failed to create FAQ');
     }
   };
 
@@ -89,8 +92,9 @@ export default function FaqManager({ initial }: { initial: Faq[] }) {
       const updated = await res.json();
       setItems(items.map((i) => (i.id === editingId ? updated : i)));
       setEditingId(null);
+      toast.success('FAQ updated.');
     } else {
-      window.alert('Failed to save FAQ');
+      toast.error('Failed to save FAQ');
     }
   };
 

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button, Card, Field, Input, Textarea } from '@/components/admin/ui';
+import { useToast } from '@/components/admin/toast/ToastProvider';
 
 export interface ClientValue {
   name: string;
@@ -15,14 +16,13 @@ export interface ClientValue {
 
 export default function ClientForm({ initial, clientId }: { initial: ClientValue; clientId?: string }) {
   const router = useRouter();
+  const toast = useToast();
   const [value, setValue] = useState(initial);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
-    setError('');
     const url = clientId ? `/api/admin/clients/${clientId}` : '/api/admin/clients';
     const method = clientId ? 'PATCH' : 'POST';
     const res = await fetch(url, {
@@ -33,11 +33,12 @@ export default function ClientForm({ initial, clientId }: { initial: ClientValue
     setSaving(false);
     if (res.ok) {
       const client = await res.json();
+      toast.success(clientId ? 'Client updated.' : 'Client created.');
       router.push(`/admin/clients/${client.id}`);
       router.refresh();
     } else {
       const data = await res.json().catch(() => ({}));
-      setError(data.error || 'Failed to save client');
+      toast.error(data.error || 'Failed to save client');
     }
   };
 
@@ -65,8 +66,6 @@ export default function ClientForm({ initial, clientId }: { initial: ClientValue
           <Textarea rows={3} value={value.notes} onChange={(e) => setValue({ ...value, notes: e.target.value })} />
         </Field>
       </Card>
-
-      {error && <p className="text-red-500 text-sm">{error}</p>}
 
       <div className="flex gap-3">
         <Button type="submit" disabled={saving}>{saving ? 'Saving...' : 'Save Client'}</Button>

@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { FaUserPlus, FaCheckCircle } from 'react-icons/fa';
 import { Select, EmptyState } from '@/components/admin/ui';
 import DeleteButton from '@/components/admin/DeleteButton';
+import { useToast } from '@/components/admin/toast/ToastProvider';
 
 interface Lead {
   id: string;
@@ -25,6 +26,7 @@ const statuses = ['new', 'contacted', 'converted', 'closed'];
 
 export default function LeadsTable({ initial }: { initial: Lead[] }) {
   const router = useRouter();
+  const toast = useToast();
   const [leads, setLeads] = useState(initial);
   const [converting, setConverting] = useState<string | null>(null);
 
@@ -37,6 +39,9 @@ export default function LeadsTable({ initial }: { initial: Lead[] }) {
     if (res.ok) {
       const updated = await res.json();
       setLeads(leads.map((l) => (l.id === id ? updated : l)));
+      toast.success('Lead status updated.');
+    } else {
+      toast.error('Failed to update lead status');
     }
   };
 
@@ -47,10 +52,11 @@ export default function LeadsTable({ initial }: { initial: Lead[] }) {
     if (res.ok) {
       const updated = await res.json();
       setLeads(leads.map((l) => (l.id === id ? updated : l)));
+      toast.success('Lead converted to client.');
       router.refresh();
     } else {
       const data = await res.json().catch(() => ({}));
-      window.alert(data.error || 'Failed to convert lead');
+      toast.error(data.error || 'Failed to convert lead');
     }
   };
 

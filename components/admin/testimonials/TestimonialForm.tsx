@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button, Card, Checkbox, Field, Input, Select, Textarea } from '@/components/admin/ui';
 import ImageUploadField from '@/components/admin/ImageUploadField';
+import { useToast } from '@/components/admin/toast/ToastProvider';
 
 export interface TestimonialValue {
   name: string;
@@ -25,14 +26,13 @@ export default function TestimonialForm({
   testimonialId?: string;
 }) {
   const router = useRouter();
+  const toast = useToast();
   const [value, setValue] = useState(initial);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
-    setError('');
     const url = testimonialId ? `/api/admin/testimonials/${testimonialId}` : '/api/admin/testimonials';
     const method = testimonialId ? 'PATCH' : 'POST';
     const res = await fetch(url, {
@@ -42,11 +42,12 @@ export default function TestimonialForm({
     });
     setSaving(false);
     if (res.ok) {
+      toast.success(testimonialId ? 'Testimonial updated.' : 'Testimonial created.');
       router.push('/admin/testimonials');
       router.refresh();
     } else {
       const data = await res.json().catch(() => ({}));
-      setError(data.error || 'Failed to save testimonial');
+      toast.error(data.error || 'Failed to save testimonial');
     }
   };
 
@@ -84,8 +85,6 @@ export default function TestimonialForm({
 
         <Checkbox label="Published" checked={value.published} onChange={(e) => setValue({ ...value, published: e.target.checked })} />
       </Card>
-
-      {error && <p className="text-red-500 text-sm">{error}</p>}
 
       <div className="flex gap-3">
         <Button type="submit" disabled={saving}>{saving ? 'Saving...' : 'Save Testimonial'}</Button>

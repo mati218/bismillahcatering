@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { FaPlus, FaTrash } from 'react-icons/fa';
 import { Button, Card, Field, Input, Select, Textarea } from '@/components/admin/ui';
+import { useToast } from '@/components/admin/toast/ToastProvider';
 
 export interface QuotationItemValue {
   description: string;
@@ -42,9 +43,9 @@ export default function QuotationForm({
   shareUrl?: string;
 }) {
   const router = useRouter();
+  const toast = useToast();
   const [value, setValue] = useState(initial);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
 
   const updateItem = (i: number, patch: Partial<QuotationItemValue>) =>
     setValue({ ...value, items: value.items.map((item, idx) => (idx === i ? { ...item, ...patch } : item)) });
@@ -57,7 +58,6 @@ export default function QuotationForm({
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
-    setError('');
     const url = quotationId ? `/api/admin/quotations/${quotationId}` : '/api/admin/quotations';
     const method = quotationId ? 'PATCH' : 'POST';
     const res = await fetch(url, {
@@ -68,11 +68,12 @@ export default function QuotationForm({
     setSaving(false);
     if (res.ok) {
       const q = await res.json();
+      toast.success(quotationId ? 'Quotation updated.' : 'Quotation created.');
       router.push(`/admin/quotations/${q.id}`);
       router.refresh();
     } else {
       const data = await res.json().catch(() => ({}));
-      setError(data.error || 'Failed to save quotation');
+      toast.error(data.error || 'Failed to save quotation');
     }
   };
 
@@ -105,7 +106,7 @@ export default function QuotationForm({
           <Field label="Public Share Link">
             <div className="flex gap-2">
               <Input readOnly value={shareUrl} />
-              <Button type="button" variant="secondary" onClick={() => navigator.clipboard.writeText(shareUrl)}>Copy</Button>
+              <Button type="button" variant="secondary" onClick={() => { navigator.clipboard.writeText(shareUrl); toast.success('Link copied to clipboard.'); }}>Copy</Button>
               <Button type="button" variant="secondary" onClick={() => window.open(shareUrl, '_blank')}>Open</Button>
             </div>
           </Field>
@@ -151,8 +152,6 @@ export default function QuotationForm({
           </div>
         </div>
       </Card>
-
-      {error && <p className="text-red-500 text-sm">{error}</p>}
 
       <div className="flex gap-3">
         <Button type="submit" disabled={saving}>{saving ? 'Saving...' : 'Save Quotation'}</Button>

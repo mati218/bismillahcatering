@@ -3,17 +3,21 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { FaTrash } from 'react-icons/fa';
+import { useToast } from '@/components/admin/toast/ToastProvider';
 
 export default function DeleteButton({
   url,
   confirmMessage = 'Are you sure you want to delete this? This cannot be undone.',
+  successMessage = 'Deleted successfully.',
   onDeleted,
 }: {
   url: string;
   confirmMessage?: string;
+  successMessage?: string;
   onDeleted?: () => void;
 }) {
   const router = useRouter();
+  const toast = useToast();
   const [loading, setLoading] = useState(false);
 
   const onClick = async () => {
@@ -23,14 +27,15 @@ export default function DeleteButton({
       const res = await fetch(url, { method: 'DELETE' });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        window.alert(data.error || 'Failed to delete');
+        toast.error(data.error || 'Failed to delete');
         setLoading(false);
         return;
       }
+      toast.success(successMessage);
       if (onDeleted) onDeleted();
       else router.refresh();
     } catch {
-      window.alert('Something went wrong. Please try again.');
+      toast.error('Something went wrong. Please try again.');
       setLoading(false);
     }
   };
