@@ -6,6 +6,7 @@ A Next.js (App Router) site for Bismillah Catering with a Postgres-backed admin 
 
 - **Next.js 16** (App Router, Route Handlers as the API layer)
 - **PostgreSQL** via **Prisma** — local dev via Docker Compose, swap to [Neon](https://neon.tech) for production by changing one env var
+- **Cloudinary** for admin-panel image uploads
 - Custom cookie-session auth for the admin panel (no third-party auth service)
 
 ## Getting Started
@@ -54,6 +55,6 @@ A Next.js (App Router) site for Bismillah Catering with a Postgres-backed admin 
 
 ## Deploying / going live
 
-- **Database**: create a [Neon](https://neon.tech) Postgres project, set `DATABASE_URL` to its connection string, then run `npx prisma migrate deploy` against it. Nothing else in the app needs to change.
-- **Uploaded images**: the admin panel currently saves uploads to `public/uploads` on local disk. This works for local dev and traditional Node hosting, but **will not persist** on serverless platforms like Vercel (the filesystem is ephemeral / read-only in production). Before deploying there, swap the upload handler (`app/api/admin/uploads/route.ts`) to a blob store such as Vercel Blob or Cloudinary.
+- **Database**: create a [Neon](https://neon.tech) Postgres project, set `DATABASE_URL` (pooled) and `DIRECT_URL` (non-pooled, for migrations) to its connection strings, then run `npx prisma migrate deploy` against it. Nothing else in the app needs to change.
+- **Uploaded images**: handled by Cloudinary (`CLOUDINARY_URL` in `.env`), so uploads work the same in local dev and on serverless hosts like Vercel — no local disk involved.
 - **Secrets**: set `ADMIN_JWT_SECRET` to a long random string in production, and change the seeded admin password.

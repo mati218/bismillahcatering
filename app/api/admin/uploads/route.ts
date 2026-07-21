@@ -1,9 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { mkdir, writeFile } from 'fs/promises';
-import path from 'path';
-import { randomUUID } from 'crypto';
+import { v2 as cloudinary } from 'cloudinary';
 
-const ALLOWED_EXTENSIONS = new Set(['.jpg', '.jpeg', '.png', '.webp', '.gif', '.avif']);
 const MAX_SIZE = 8 * 1024 * 1024;
 
 export async function POST(request: NextRequest) {
@@ -20,15 +17,15 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'File too large (max 8MB)' }, { status: 400 });
   }
 
-  let ext = path.extname(file.name).toLowerCase();
-  if (!ALLOWED_EXTENSIONS.has(ext)) ext = '.jpg';
-
-  const uploadDir = path.join(process.cwd(), 'public', 'uploads');
-  await mkdir(uploadDir, { recursive: true });
-
-  const filename = `${randomUUID()}${ext}`;
   const buffer = Buffer.from(await file.arrayBuffer());
-  await writeFile(path.join(uploadDir, filename), buffer);
+  const dataUri = `data:${file.type};base64,${buffer.toString('base64')}`;
 
-  return NextResponse.json({ url: `/uploads/${filename}` });
+  try {
+    const result = await cloudinary.uploader.upload(dataUri, {
+      folder: 'bismillah-catering',
+    });
+    return NextResponse.json({ url: result.secure_url });
+  } catch {
+    return NextResponse.json({ error: 'Upload failed' }, { status: 500 });
+  }
 }
