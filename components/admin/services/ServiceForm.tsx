@@ -6,6 +6,7 @@ import { FaPlus, FaTrash } from 'react-icons/fa';
 import { Button, Card, Checkbox, Field, Input, Select, Textarea } from '@/components/admin/ui';
 import ImageUploadField from '@/components/admin/ImageUploadField';
 import { useToast } from '@/components/admin/toast/ToastProvider';
+import { deleteUploadedImage } from '@/lib/deleteUploadedImage';
 
 export interface ServiceGalleryValue {
   src: string;
@@ -48,7 +49,10 @@ export default function ServiceForm({ initial, serviceId }: { initial: ServiceVa
   const updateGallery = (i: number, patch: Partial<ServiceGalleryValue>) =>
     setValue({ ...value, gallery: value.gallery.map((g, idx) => (idx === i ? { ...g, ...patch } : g)) });
   const addGalleryItem = () => setValue({ ...value, gallery: [...value.gallery, { src: '', alt: '', type: 'image' }] });
-  const removeGalleryItem = (i: number) => setValue({ ...value, gallery: value.gallery.filter((_, idx) => idx !== i) });
+  const removeGalleryItem = (i: number) => {
+    deleteUploadedImage(value.gallery[i]?.src);
+    setValue({ ...value, gallery: value.gallery.filter((_, idx) => idx !== i) });
+  };
 
   const updateHighlight = (i: number, patch: Partial<ServiceHighlightValue>) =>
     setValue({ ...value, highlights: value.highlights.map((h, idx) => (idx === i ? { ...h, ...patch } : h)) });

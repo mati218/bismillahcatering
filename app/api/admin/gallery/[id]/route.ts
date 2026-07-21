@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { deleteCloudinaryAssets } from '@/lib/cloudinary';
 
 export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -47,6 +48,10 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
 export async function DELETE(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  await prisma.galleryEvent.delete({ where: { id } });
+  const event = await prisma.galleryEvent.delete({
+    where: { id },
+    include: { images: true },
+  });
+  await deleteCloudinaryAssets([event.cover, ...event.images.map((i) => i.src)]);
   return NextResponse.json({ ok: true });
 }

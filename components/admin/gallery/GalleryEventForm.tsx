@@ -6,6 +6,7 @@ import { FaPlus, FaTrash } from 'react-icons/fa';
 import { Button, Card, Checkbox, Field, Input, Textarea } from '@/components/admin/ui';
 import ImageUploadField from '@/components/admin/ImageUploadField';
 import { useToast } from '@/components/admin/toast/ToastProvider';
+import { deleteUploadedImage } from '@/lib/deleteUploadedImage';
 
 export interface GalleryImageValue {
   src: string;
@@ -33,7 +34,10 @@ export default function GalleryEventForm({ initial, eventId }: { initial: Galler
     setValue({ ...value, images: value.images.map((img, idx) => (idx === i ? { ...img, ...patch } : img)) });
 
   const addImage = () => setValue({ ...value, images: [...value.images, { src: '', caption: '' }] });
-  const removeImage = (i: number) => setValue({ ...value, images: value.images.filter((_, idx) => idx !== i) });
+  const removeImage = (i: number) => {
+    deleteUploadedImage(value.images[i]?.src);
+    setValue({ ...value, images: value.images.filter((_, idx) => idx !== i) });
+  };
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

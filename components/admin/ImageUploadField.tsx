@@ -3,6 +3,7 @@
 import { useRef, useState } from 'react';
 import Image from 'next/image';
 import { FaCloudUploadAlt, FaSpinner, FaTrash } from 'react-icons/fa';
+import { deleteUploadedImage } from '@/lib/deleteUploadedImage';
 
 export default function ImageUploadField({
   value,
@@ -21,6 +22,7 @@ export default function ImageUploadField({
   const handleFile = async (file: File) => {
     setUploading(true);
     setError('');
+    const previousValue = value;
     try {
       const formData = new FormData();
       formData.append('file', file);
@@ -28,6 +30,7 @@ export default function ImageUploadField({
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Upload failed');
       onChange(data.url);
+      if (previousValue && previousValue !== data.url) deleteUploadedImage(previousValue);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Upload failed');
     } finally {
@@ -46,6 +49,7 @@ export default function ImageUploadField({
 
   const removeImage = (e: React.MouseEvent) => {
     e.stopPropagation();
+    deleteUploadedImage(value);
     onChange('');
   };
 

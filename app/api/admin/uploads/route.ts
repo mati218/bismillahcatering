@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { v2 as cloudinary } from 'cloudinary';
+import { deleteCloudinaryAsset } from '@/lib/cloudinary';
 
 const MAX_SIZE = 8 * 1024 * 1024;
 
@@ -28,4 +29,13 @@ export async function POST(request: NextRequest) {
   } catch {
     return NextResponse.json({ error: 'Upload failed' }, { status: 500 });
   }
+}
+
+// Deletes the Cloudinary asset behind a given image URL, so replacing/removing
+// an image in the admin panel doesn't leave the old file taking up storage.
+export async function DELETE(request: NextRequest) {
+  const body = await request.json().catch(() => null);
+  const url = typeof body?.url === 'string' ? body.url : '';
+  await deleteCloudinaryAsset(url);
+  return NextResponse.json({ ok: true });
 }
