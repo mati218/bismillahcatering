@@ -23,7 +23,6 @@ export interface PackageValue {
   order: number;
   features: PackageFeatureValue[];
 }
-
 export default function PackageForm({ initial, packageId }: { initial: PackageValue; packageId?: string }) {
   const router = useRouter();
   const toast = useToast();
